@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>يصير ونص - نسخة القصف المتبادل</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0b141a; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+
+        /* شريط العنوان */
+        .chat-header { 
+            background-color: #202c33; 
+            padding: 12px; 
+            text-align: center; 
+            border-bottom: 1px solid #2f3b43; 
+        }
+        .chat-header h1 { color: #00a884; margin: 0; font-size: 18px; }
+
+        /* شاشة الشات */
+        .chat-container { 
+            flex: 1; 
+            padding: 15px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+
+        .message { 
+            max-width: 80%; 
+            padding: 10px 14px; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            font-weight: 500; 
+            line-height: 1.4;
+            animation: popIn 0.15s ease-in-out; 
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* اللعبة (تظهر على اليمين باللون الرمادي) */
+        .message.bot { 
+            background-color: #202c33; 
+            color: #e9edef; 
+            align-self: flex-start; 
+            border-top-right-radius: 0; 
+        }
+
+        /* أنا (يظهر على اليسار باللون الأخضر) */
+        .message.user { 
+            background-color: #005c4b; 
+            color: #e9edef; 
+            align-self: flex-end; 
+            border-top-left-radius: 0; 
+        }
+
+        /* منطقة الكيبورد تحت */
+        .keyboard-area { 
+            background-color: #111b21; 
+            padding: 12px; 
+            border-top: 1px solid #2f3b43; 
+            max-height: 40vh; 
+            overflow-y: auto; 
+        }
+        
+        .buttons-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+        }
+
+        .word-btn { 
+            background-color: #2a3942; 
+            color: #e9edef; 
+            border: none; 
+            padding: 12px 5px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            text-align: center; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .word-btn:active { 
+            background-color: #00a884; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">
+        <h1>يصير ونص! 💬⚔️</h1>
+    </div>
+
+    <div class="chat-container" id="chatBox"></div>
+
+    <div class="keyboard-area">
+        <div class="buttons-grid" id="keyboardGrid"></div>
+    </div>
+
+    <script>
+        // قاعدة البيانات الـ 31 كلمة كاملة ومضبوطة
+        const qasfDatabase = [
+            { id: 1, word: "مربع", reply: "سياره ابوك مربعه 🛞" },
+            { id: 2, word: "بيت", reply: "تم رصد بيتك بنجاح 🏠🎯" },
+            { id: 3, word: "عدل", reply: "مثل حبل الكذب عدل 🧵" },
+            { id: 4, word: "مبهذل", reply: "مثل حظي مبهذل 🫠" },
+            { id: 5, word: "مصفح", reply: "مثل جهرتك مصفحة 🛡️" },
+            { id: 6, word: "مدعبل", reply: "مثل طوبة أبوك مدعبلة ⚽" },
+            { id: 7, word: "نار", reply: "مثل جهرتك المحترقة بالنار 🔥" },
+            { id: 8, word: "طاسة", reply: "مثل جهرتك المطرقة بالطاسة 🥣" },
+            { id: 9, word: "شحن", reply: "مثل حظي اللي مخلص شحن 🪫" },
+            { id: 10, word: "صينية", reply: "مثل جهرتك ممسوحة بالصينية 🍽️" },
+            { id: 11, word: "تاير", reply: "مثل عقلك المفشوش مثل التاير 🛞" },
+            { id: 12, word: "قوري", reply: "مثل حظي المحروق بقاع القوري 🫖" },
+            { id: 13, word: "صوبة", reply: "مثل حظي المطفى بعز الشتا والصوبة 🪵" },
+            { id: 14, word: "ماعون", reply: "مثل جهرتك العريضة عبالك ماعون 🍽️" },
+            { id: 15, word: "قفل", reply: "مثل عقلك القافل وما يفتح بقفل 🔒" },
+            { id: 16, word: "شمعة", reply: "مثل مستقبلي المظلم المحترق مثل الشمعة 🕯️" },
+            { id: 17, word: "خاشوكة", reply: "مثل حظي المخسوف ببطن الخاشوكة 🥄" },
+            { id: 18, word: "جام", reply: "مثل جهرتك المكسورة عبالك جام 🪟" },
+            { id: 19, word: "سطل", reply: "مثل عقلك المتروس ماي عبالك سطل 🪣" },
+            { id: 20, word: "واير", reply: "مثل اعصابي المخربطة والملفوفة مثل الواير 🔌" },
+            { id: 21, word: "بطل", reply: "مثل مستقبلي الفارغ عبالك بطل 🍾" },
+            { id: 22, word: "صوندا", reply: "مثل حظي الأعوج عبالك صوندا 🚰" },
+            { id: 23, word: "مروحة", reply: "مثل عقلك المفتر عبالك مروحة 🪭" },
+            { id: 24, word: "طابوقة", reply: "مثل جهرتك المربعة عبالك طابوقة 🧱" },
+            { id: 25, word: "مخيّد", reply: "مثل مستقبلي النايم عبالك مخيّد 💤" },
+            { id: 26, word: "جدر", reply: "مثل حظي المحروق بحكة الجدر 🍲" },
+            { id: 27, word: "برغي", reply: "مثل عقلك الفالت عبالك برغي 🔩" },
+            { id: 28, word: "قاط", reply: "مثل حظي المبهذل وما يفيد وياه قاط 👔" },
+            { id: 29, word: "كارتون", reply: "مثل مستقبلي المبهذل ببطن كارتون 📦" },
+            { id: 30, word: "شحاطة", reply: "مثل جهرتك ممسوحة بالشحاطة 🩴" },
+            { id: 31, word: "كاونتر", reply: "مثل عقلك القافل وعبالك كاونتر 🗄️" }
+        ];
+
+        let currentIndex = 0; 
+
+        function buildKeyboard() {
+            const grid = document.getElementById('keyboardGrid');
+            grid.innerHTML = "";
+            qasfDatabase.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "word-btn";
+                btn.innerText = item.word;
+                btn.id = "btn-" + item.id;
+                btn.onclick = () => handlePlayerClick(item);
+                grid.appendChild(btn);
+            });
+        }
+
+        // بدء جولة جديدة بحسب الدور (فردي أو زوجي)
+        function nextRound() {
+            if (currentIndex >= qasfDatabase.length) {
+                const chatBox = document.getElementById('chatBox');
+                const endMsg = document.createElement('div');
+                endMsg.className = 'message bot';
+                endMsg.style.alignSelf = 'center';
+                endMsg.style.backgroundColor = 'transparent';
+                endMsg.style.color = '#00a884';
+                endMsg.innerText = "🎉 انتصرت بالمواجهة! خلصت الـ 31 كلمة وقصفت جبهة اللعبة بالتناوب!";
+                chatBox.appendChild(endMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                return;
+            }
+
+            const chatBox = document.getElementById('chatBox');
+            const botMsg = document.createElement('div');
+            botMsg.className = 'message bot';
+
+            // إذا كان الترتيب فردي (0, 2, 4..) -> دورك أنت تقصف اللعبة
+            if (currentIndex % 2 === 0) {
+                botMsg.innerText = "اللعبة: قول " + qasfDatabase[currentIndex].word;
+            } 
+            // إذا كان الترتيب زوجي (1, 3, 5..) -> دور اللعبة تقصفك أنت فوراً
+            else {
+                botMsg.innerText = "اللعبة: " + qasfDatabase[currentIndex].word;
+            }
+
+            chatBox.appendChild(botMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // معالجة الضغط على الكيبورد
+        function handlePlayerClick(item) {
+            if (currentIndex >= qasfDatabase.length || item.id !== qasfDatabase[currentIndex].id) {
+                return; 
+            }
+
+            const chatBox = document.getElementById('chatBox');
+            const targetBtn = document.getElementById("btn-" + item.id);
+
+            if(targetBtn) targetBtn.style.visibility = "hidden"; // إخفاء الزر المستخدم
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+
+            // إذا جان دورك تقصف اللعبة
+            if (currentIndex % 2 === 0) {
+                userMsg.innerText = "أنا: " + item.word;
+                chatBox.appendChild(userMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                // اللعبة تنقصف بالرد وراها بثانية
+                setTimeout(() => {
+                    const botReplyMsg = document.createElement('div');
+                    botReplyMsg.className = 'message bot';
+                    botReplyMsg.innerText = "اللعبة: " + item.reply;
+                    chatBox.appendChild(botReplyMsg);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    
+                    currentIndex++;
+                    setTimeout(nextRound, 1500); // الانتقال للجولة التالية
+                }, 1000);
+            } 
+            // إذا جان دور اللعبة تقصفك أنت (الرد ينزل بلسانك فوراً)
+            else {
+                userMsg.innerText = "أنا: " + item.reply;
+                chatBox.appendChild(userMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                currentIndex++;
+                setTimeout(nextRound, 1500); // الانتقال للجولة التالية
+            }
+        }
+
+        window.onload = () => {
+            buildKeyboard();
+            setTimeout(nextRound, 600); 
+        };
+    </script>
+</body>
+</html>
