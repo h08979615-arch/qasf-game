@@ -3,146 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة قصف جبهات التفاعلية</title>
+    <title>قصف جبهات - GAME MODE 🎮</title>
     <style>
+        :root {
+            --ps-blue: #00439c;
+            --xbox-green: #107c10;
+            --neon-glow: #00f0ff;
+            --bg-dark: #0a0f18;
+            --card-bg: #131c2e;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
+            background: radial-gradient(circle at center, #1a2639 0%, var(--bg-dark) 100%);
             color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
-        }
-        .game-container {
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 2px solid #ff4757;
-        }
-        h1 {
-            color: #ff4757;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .chat-box {
-            background-color: #2e2e2e;
             padding: 15px;
-            border-radius: 10px;
-            min-height: 80px;
+            box-sizing: border-box;
+        }
+
+        /* حاوية اللعبة على ستايل الكونسول */
+        .console-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(0, 67, 156, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05);
+            border: 2px solid #1f2d44;
+            text-align: center;
+        }
+
+        /* الـ Header المستوحى من الـ Gaming */
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+            border-bottom: 2px solid #1f2d44;
+            padding-bottom: 10px;
+        }
+
+        .console-title {
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #00f0ff, #00439c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .console-badge {
+            background-color: var(--xbox-green);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(16, 124, 16, 0.5);
+        }
+
+        /* شاشة عرض القصف (تلفزيون الألعاب) */
+        .screen-display {
+            background: linear-gradient(145deg, #070d14, #0f1724);
+            border: 2px solid #00f0ff;
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 70px;
+            font-size: 17px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-            border-left: 5px solid #2ed573;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+            color: #e2e8f0;
+            line-height: 1.5;
         }
+
+        /* مجموعة الإدخال والكتابة */
         .input-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
+
         input[type="text"] {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background-color: #3a3a3a;
+            padding: 14px;
+            border: 2px solid #1f2d44;
+            border-radius: 10px;
+            background-color: #070d14;
             color: #fff;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
+            text-align: right;
+            transition: all 0.3s ease;
         }
+
         input[type="text"]:focus {
-            border: 1px solid #ff4757;
+            border-color: var(--neon-glow);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
         }
-        button {
-            background-color: #ff4757;
+
+        .btn-action {
+            background: linear-gradient(135deg, #00f0ff, #00439c);
             color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 0 22px;
+            font-size: 15px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 67, 156, 0.4);
+            transition: transform 0.1s ease;
         }
-        button:hover {
-            background-color: #ff6b81;
+
+        .btn-action:active {
+            transform: scale(0.95);
+        }
+
+        /* قائمة الأزرار على شكل مكتبة ألعاب (Grid) */
+        .games-menu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        /* تصميم زر الكلمة كأنه لعبة كونسول */
+        .game-slot {
+            background: linear-gradient(135deg, #1c293d, #141f30);
+            color: #cbd5e1;
+            border: 1px solid #273b54;
+            padding: 14px 5px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* تأثير التحديد والضغط كأنك تلعب بليستيشن */
+        .game-slot:active {
+            background: linear-gradient(135deg, #00439c, #00f0ff);
+            color: #ffffff;
+            border-color: #00f0ff;
+            transform: scale(0.95);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+        }
+
+        /* علامات إضافية لثيم الـ Controllers */
+        .footer-branding {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #4a5d78;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
         }
     </style>
 </head>
 <body>
 
-<div class="game-container">
-    <h1>🤖 لعبة قصف جبهات</h1>
+<div class="console-container">
+    <div class="console-header">
+        <div class="console-title">🎮 PLAYSTATION & XBOX MODE</div>
+        <div class="console-badge">ONLINE</div>
+    </div>
     
-    <div class="chat-box" id="botResponse">
-        اكتب كلمة بالخانة جوة وخلينا نشوف حظك! 😉
+    <div class="screen-display" id="botResponse">
+        [ جاهز للتشغيل ] قُل كلمة بالخانة أو حدد زر اللعبة وابدأ الهجوم! ⚡
     </div>
 
     <div class="input-group">
-        <input type="text" id="userInput" placeholder="اكتب كلمة مثل: بيت...">
-        <button onclick="playGame()">إرسال</button>
+        <input type="text" id="userInput" placeholder="ادخل كلمة من اختيارك...">
+        <button class="btn-action" onclick="sendWord()">إرسال</button>
+    </div>
+
+    <div class="games-menu">
+        <button class="game-slot" onclick="pressButton('مربع')">▢ مربع</button>
+        <button class="game-slot" onclick="pressButton('بيت')">⌂ بيت</button>
+        <button class="game-slot" onclick="pressButton('عدل')">⚡ عدل</button>
+        
+        <button class="game-slot" onclick="pressButton('مبهذل')">⚔️ مبهذل</button>
+        <button class="game-slot" onclick="pressButton('mصفح')">🛡️ مصفح</button>
+        <button class="game-slot" onclick="pressButton('مدعبل')">⚪ مدعبل</button>
+        
+        <button class="game-slot" onclick="pressButton('نار')">🔥 نار</button>
+        <button class="game-slot" onclick="pressButton('طاسة')">🥣 طاسة</button>
+        <button class="game-slot" onclick="pressButton('شحن')">🔋 شحن</button>
+        
+        <button class="game-slot" onclick="pressButton('صينية')">🍽️ صينية</button>
+        <button class="game-slot" onclick="pressButton('تاير')">🛞 تاير</button>
+        <button class="game-slot" onclick="pressButton('قوري')">🫖 قوري</button>
+        
+        <button class="game-slot" onclick="pressButton('صوبة')">🪵 صوبة</button>
+        <button class="game-slot" onclick="pressButton('ماعون')">🥣 ماعون</button>
+        <button class="game-slot" onclick="pressButton('قفل')">🔒 قفل</button>
+    </div>
+
+    <div class="footer-branding">
+        <span>PS5 UI v2.0</span>
+        <span>•</span>
+        <span>XBOX LIVE</span>
     </div>
 </div>
 
 <script>
-function playGame() {
-    const inputField = document.getElementById('userInput');
+// قائمة ردود القصف
+const responses = {
+    "مربع": "SYSTEM: جبهتك صايرة مربع ومحيطها صفر! 📐💥",
+    "بيت": "SYSTEM: عبالي قصر! لو تشتريلك عقل وتطلع من بيتكم مو أحسن؟ 🏠💀",
+    "عدل": "SYSTEM: سوي حظك عدل بالأول بعدين احچي! 😂",
+    "مبهذل": "SYSTEM: المبهذل مبهذل لو يلبس ذهب، وجبهتك أكبر دليل! 👕💨",
+    "mصفح": "SYSTEM: وجهك مصفح ما يفيد بيه حتى الصبغ! 🚗🛡️",
+    "مدعبل": "SYSTEM: جبهتك مدعبلة ودحرجت لآخر الشارع! 🔴😂",
+    "نار": "SYSTEM: جبهتك احترقت وصارت رماد! 🔥💀",
+    "طاسة": "SYSTEM: طاسة وترقع بطاسة، ووجهك ماله عوافة! 🥣💥",
+    "شحن": "SYSTEM: موبايلك شحنه مخلص وفكرك هم مخلص! 🔋🔌",
+    "صينية": "SYSTEM: وجهك صينية ومفتوح للخطار! 🍽️🤣",
+    "تاير": "SYSTEM: جبهتك بنشرت وباقية على السيم! 🛞💨",
+    "قوري": "SYSTEM: قوري وبلا يدة، كلامك ماله فايدة! 🫖💀",
+    "صوبة": "SYSTEM: صوبة ومطافية، روح تدفى بعيد! 🪵🔥",
+    "ماعون": "SYSTEM: ماعون مكسور وما يلم حچيك الماصخ! 🍽️💥",
+    "قفل": "SYSTEM: مخك قفل ومفتاحه ضاع بالبحر! 🔒🌊"
+};
+
+const randomGhabahat = [
+    "CRITICAL HIT: قصف عشوائي! جبهتك طارت لغير قارة 🚀💨",
+    "FATALITY: لو تجمع حچيك هذا كله وتبيعه ما يجيب ربع دينار! 😂",
+    "GAME OVER: الكلام ببلاش، بس جبهتك هسة طارت! 💥"
+];
+
+function processResponse(word) {
     const responseBox = document.getElementById('botResponse');
-    const word = inputField.value.trim();
-
-    // قائمة الردود الجاهزة على كلمات محددة
-    const specialResponses = {
-        "بيت": "بيت؟ عبالي قصر! لو تشتريلك عقل وتطلع من بيتكم القديم مو أحسن؟ 🏠💥",
-        "مدرسة": "المدرسة للذكاء.. أنت شموديك هناك بالغلط؟ 🏫😂",
-        "فلوس": "تتكلم عن الفلوس وجيبك مابي حتى كروة باص؟ 💵💀"
-    };
-
-    // قائمة جبهات عشوائية إذا كتب كلمة ثانية
-    const randomGhabahat = [
-        "قصف ثلاثي الأبعاد! جبهتك طارت لغير قارة 🚀💨",
-        "لو تجمع حچيك هذا كله وتبيعه ما تشتري بيه ربع ثقة من اللي عندك! 😂",
-        "الكلام ببللاش، بس جبهتك هسة صارت بمليون! 💥",
-        "حاول مرة أخرى، جبهتك هسة قيد الصيانة 🛠️💀"
-    ];
-
-    if (word === "") {
-        responseBox.style.borderLeftColor = "#ffa502";
-        responseBox.innerText = "اكتبلك كلمة أول شي، لا تخاف! 😎";
-        return;
-    }
-
-    // التحقق إذا الكلمة موجودة بالقائمة الخاصة
-    if (specialResponses[word]) {
-        responseBox.style.borderLeftColor = "#ff4757";
-        responseBox.innerText = specialResponses[word];
+    if (responses[word]) {
+        responseBox.innerText = responses[word];
     } else {
-        // اختيار قصف عشوائي
         const randomIndex = Math.floor(Math.random() * randomGhabahat.length);
-        responseBox.style.borderLeftColor = "#ffa502";
         responseBox.innerText = randomGhabahat[randomIndex];
     }
+}
 
-    // تفريغ الخانة بعد الإرسال
+function sendWord() {
+    const inputField = document.getElementById('userInput');
+    const word = inputField.value.trim();
+    if (word === "") return;
+    processResponse(word);
     inputField.value = "";
 }
 
-// تشغيل الإرسال عند الضغط على زر Enter بالكيبورد
+function pressButton(word) {
+    processResponse(word);
+}
+
 document.getElementById('userInput').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
-        playGame();
+        sendWord();
     }
 });
 </script>
 
 </body>
 </html>
-
