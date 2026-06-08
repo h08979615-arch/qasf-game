@@ -1,13 +1,13 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>يصير ونص! 🎮⚔️</title>
     <style>
         :root {
             --primary: #00a884;
+            --primary-glow: rgba(0, 168, 132, 0.3);
             --bg-dark: #0b141a;
             --panel-bg: #111b21;
             --btn-bg: #202c33;
@@ -15,71 +15,97 @@
             --text-light: #e9edef;
             --text-muted: #8696a0;
             --danger: #ea0038;
+            --user-msg: #005c4b;
         }
 
         * {
             box-sizing: border-box;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        html, body {
             background-color: var(--bg-dark);
             color: var(--text-light);
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
         }
 
-        /* حاوية الشاشات المشتركة */
-        .screen {
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* حاوية اللعبة الرئيسية لضمان عدم التمدد المشوه على الشاشات الكبيرة */
+        .app-container {
             width: 100%;
             max-width: 450px;
             height: 100%;
+            background-color: var(--bg-dark);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
             display: flex;
             flex-direction: column;
             padding: 20px;
             box-sizing: border-box;
-            justify-content: center;
-            animation: fadeIn 0.2s ease-in-out;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 1;
         }
 
         .hidden {
-            display: none !important;
+            opacity: 0;
+            transform: scale(0.98);
+            pointer-events: none;
+            z-index: 0;
+            position: absolute;
+            width: 100%; height: 100%;
+            overflow: hidden;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
+        /* 1. الشاشة الرئيسية */
+        .main-menu-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* 1. الشاشة الرئيسية (MainMenu) */
         .menu-title {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         .menu-title h1 {
-            font-size: 42px;
+            font-size: 46px;
             color: var(--primary);
             margin: 0;
-            text-shadow: 0 0 15px rgba(0, 168, 132, 0.3);
+            text-shadow: 0 0 20px var(--primary-glow);
+            letter-spacing: 1px;
         }
 
         .menu-title p {
             color: var(--text-muted);
-            margin-top: 10px;
+            margin-top: 12px;
             font-size: 16px;
         }
 
         .menu-buttons {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
             width: 100%;
         }
 
@@ -87,21 +113,21 @@
             background-color: var(--btn-bg);
             color: var(--text-light);
             border: 2px solid #222e35;
-            padding: 18px;
-            font-size: 20px;
+            padding: 16px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background-color 0.15s, transform 0.1s, border-color 0.15s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .menu-btn:active {
-            transform: scale(0.97);
+            transform: scale(0.96);
             background-color: var(--primary);
             border-color: var(--primary);
         }
@@ -114,14 +140,14 @@
             border-color: var(--danger);
         }
 
-        /* 2. شاشة اللعب (Gameplay) */
+        /* 2. شاشة اللعب المتطورة */
         .game-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-bottom: 15px;
             border-bottom: 1px solid #222e35;
-            margin-bottom: 15px;
+            min-height: 50px;
         }
 
         .back-btn {
@@ -131,28 +157,37 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            padding: 5px 0;
         }
 
         .chat-display {
             flex: 1;
             background-color: #0b141a;
             border: 1px solid #222e35;
-            border-radius: 15px;
+            border-radius: 16px;
             padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 15px;
+            margin: 15px 0;
+            scroll-behavior: smooth;
         }
 
         .msg-bubble {
             max-width: 85%;
             padding: 12px 16px;
-            border-radius: 14px;
-            font-size: 16px;
+            border-radius: 16px;
+            font-size: 15px;
             line-height: 1.4;
             font-weight: 500;
+            word-wrap: break-word;
+            animation: popBubble 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popBubble {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .msg-bot {
@@ -163,7 +198,7 @@
         }
 
         .msg-user {
-            background-color: #005c4b;
+            background-color: var(--user-msg);
             color: var(--text-light);
             align-self: flex-end;
             border-top-left-radius: 0;
@@ -171,28 +206,35 @@
 
         .input-area {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 15px;
+            min-height: 50px;
         }
 
         .input-area input {
             flex: 1;
             background-color: var(--panel-bg);
             border: 1px solid #222e35;
-            padding: 14px;
-            border-radius: 10px;
+            padding: 0 16px;
+            border-radius: 12px;
             color: white;
             font-size: 16px;
             outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-area input:focus {
+            border-color: var(--primary);
         }
 
         .input-area button {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 0 20px;
-            border-radius: 10px;
+            padding: 0 22px;
+            border-radius: 12px;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
         }
 
@@ -200,33 +242,47 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            max-height: 200px;
+            height: 180px;
+            min-height: 180px;
             overflow-y: auto;
             background-color: var(--panel-bg);
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 14px;
+            border: 1px solid #222e35;
         }
 
         .grid-word-btn {
             background-color: var(--btn-bg);
             color: white;
-            border: none;
-            padding: 12px 5px;
+            border: 1px solid #25323a;
+            padding: 10px 4px;
             font-size: 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
             text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color 0.1s, transform 0.05s;
         }
 
         .grid-word-btn:active {
             background-color: var(--primary);
+            transform: scale(0.95);
         }
 
-        /* 3. شاشة الإعدادات (Settings) */
+        /* 3. شاشة الإعدادات */
+        .settings-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding-bottom: 20px;
+        }
+
         .settings-box {
             background-color: var(--panel-bg);
-            border-radius: 15px;
+            border-radius: 16px;
             padding: 20px;
             border: 1px solid #222e35;
             margin-bottom: 20px;
@@ -239,11 +295,15 @@
             margin-bottom: 20px;
         }
 
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+
         .switch {
             position: relative;
             display: inline-block;
             width: 50px;
-            height: 26px;
+            height: 28px;
         }
 
         .switch input { display:none; }
@@ -253,158 +313,176 @@
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: #334046;
-            transition: .3s;
+            transition: .2s;
             border-radius: 34px;
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px; width: 20px;
+            height: 22px; width: 22px;
             left: 3px; bottom: 3px;
             background-color: white;
-            transition: .3s;
+            transition: .2s;
             border-radius: 50%;
         }
 
         input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(24px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        /* ميزة إضافة قصف مخصص */
         .add-custom-qasf {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-            border-top: 1px solid #222e35;
-            padding-top: 15px;
+            gap: 12px;
+            margin-top: 10px;
         }
 
         .add-custom-qasf input {
             background-color: #1a242b;
             border: 1px solid #222e35;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             color: white;
             outline: none;
+            font-size: 15px;
+        }
+
+        .add-custom-qasf input:focus {
+            border-color: var(--primary);
         }
 
         .add-custom-qasf button {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        .add-custom-qasf button:active {
+            transform: scale(0.98);
         }
 
-        /* 4. شاشة الخروج (ExitScreen) */
+        /* 4. شاشة الخروج */
         .exit-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
         }
 
         .exit-content h2 {
-            font-size: 32px;
+            font-size: 34px;
             color: var(--danger);
-            margin-bottom: 15px;
+            margin: 0 0 15px 0;
         }
 
         .exit-content p {
             font-size: 18px;
             color: var(--text-light);
-            margin-bottom: 30px;
-            line-height: 1.5;
+            margin: 0 0 35px 0;
+            line-height: 1.6;
+            padding: 0 10px;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. الشاشة الرئيسية (MainMenu) -->
-    <div class="screen" id="mainMenu">
-        <div class="menu-title">
-            <h1>يصير ونص! 💬⚔️</h1>
-            <p>نسخة القائمة الرئيسية التفاعلية</p>
-        </div>
-        <div class="menu-buttons">
-            <button class="menu-btn" onclick="showScreen('gameplay')">🎮 ابدأ اللعب (Play)</button>
-            <button class="menu-btn" onclick="showScreen('settings')">⚙️ الإعدادات (Settings)</button>
-            <button class="menu-btn exit" onclick="showScreen('exitScreen')">🚪 خروج (Exit)</button>
-        </div>
-    </div>
+    <div class="app-container">
 
-    <!-- 2. شاشة اللعب (Gameplay) -->
-    <div class="screen hidden" id="gameplay">
-        <div class="game-header">
-            <button class="back-btn" onclick="showScreen('mainMenu')">◀ القائمة الرئيسية</button>
-            <span style="font-weight: bold; color: var(--primary);">ساحة القصف ⚔️</span>
-        </div>
-        
-        <div class="chat-display" id="chatBox">
-            <div class="msg-bubble msg-bot">اكتب كلمة بالخانة جوة، أو اضغط على أحد الأزرار حتى يطير القصف تلقائياً! 👇💥</div>
-        </div>
-
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="اكتب كلمة مثل: بيت...">
-            <button onclick="sendCustomWord()">إرسال</button>
-        </div>
-
-        <div class="words-grid" id="wordsGrid">
-            <!-- الأزرار تولد تلقائياً من الجافاسكريبت لتسهيل التعديل -->
-        </div>
-    </div>
-
-    <!-- 3. شاشة الإعدادات (Settings) -->
-    <div class="screen hidden" id="settings">
-        <div class="game-header">
-            <button class="back-btn" onclick="showScreen('mainMenu')">◀ رجوع</button>
-            <span style="font-weight: bold; color: var(--primary);">الإعدادات</span>
-        </div>
-
-        <div class="settings-box">
-            <div class="setting-item">
-                <span>تأثيرات الصوت الهزازة 📳</span>
-                <label class="switch">
-                    <input type="checkbox" id="hapticToggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-item">
-                <span>المؤثرات الصوتية 🔊</span>
-                <label class="switch">
-                    <input type="checkbox" id="soundToggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <!-- ميزة إضافة كلمة وقصف خاص باللاعب ومستمر حتى لو أغلق اللعبة -->
-            <div class="add-custom-qasf">
-                <span style="font-weight: bold; font-size: 14px; color: var(--primary);">إضافة كلمة وقصف خاص بيك ➕</span>
-                <input type="text" id="customWord" placeholder="الكلمة (مثال: تفاحة)">
-                <input type="text" id="customReply" placeholder="الرد المزلزل مالتك...">
-                <button onclick="addNewCustomQasf()">حفظ الكلمة باللعبة</button>
+        <!-- 1. الشاشة الرئيسية (MainMenu) -->
+        <div class="screen" id="mainMenu">
+            <div class="main-menu-content">
+                <div class="menu-title">
+                    <h1>يصير ونص! 💬⚔️</h1>
+                    <p>نسخة الموبايل المطورة والمقاومة للصدمات</p>
+                </div>
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="showScreen('gameplay')">🎮 ابدأ اللعب (Play)</button>
+                    <button class="menu-btn" onclick="showScreen('settings')">⚙️ الإعدادات (Settings)</button>
+                    <button class="menu-btn exit" onclick="showScreen('exitScreen')">🚪 خروج (Exit)</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 4. شاشة الخروج (ExitScreen) -->
-    <div class="screen hidden" id="exitScreen">
-        <div class="exit-content">
-            <h2>وين شارد؟ 🏃‍♂️💀</h2>
-            <p>تريد تطلع وتعوف اللعبة؟ ما تطلع منا إلا تنجبر تاكل قصفة أخيرة ومعدلة تليق بجبهتك! 😂💥</p>
-            <button class="menu-btn" style="width: 100%; margin-bottom: 12px;" onclick="showScreen('gameplay')">🤦‍♂️ تراجعت، رجعني ألعب</button>
-            <button class="menu-btn exit" style="width: 100%;" onclick="showScreen('mainMenu')">🚪 اطلع كوة (القائمة الرئيسية)</button>
+        <!-- 2. شاشة اللعب (Gameplay) -->
+        <div class="screen hidden" id="gameplay">
+            <div class="game-header">
+                <button class="back-btn" onclick="showScreen('mainMenu')">◀ القائمة</button>
+                <span style="font-weight: bold; color: var(--primary); font-size: 17px;">ساحة القصف ⚔️</span>
+                <span style="width: 45px;"></span> <!-- موازن بصري للزر الجانبي -->
+            </div>
+            
+            <div class="chat-display" id="chatBox">
+                <div class="msg-bubble msg-bot">اكتب كلمة بالصندوق جوة، أو اضغط على وحدة من الكلمات الجاهزة حتى يطير القصف مالتها فوراً! 👇💥</div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="اكتب كلمة مثل: بيت، تاير...">
+                <button onclick="sendCustomWord()">إرسال</button>
+            </div>
+
+            <div class="words-grid" id="wordsGrid">
+                <!-- الأزرار تتولد برمجياً هنا -->
+            </div>
         </div>
+
+        <!-- 3. شاشة الإعدادات (Settings) -->
+        <div class="screen hidden" id="settings">
+            <div class="game-header">
+                <button class="back-btn" onclick="showScreen('mainMenu')">◀ رجوع</button>
+                <span style="font-weight: bold; color: var(--primary); font-size: 17px;">الإعدادات العامة</span>
+                <span style="width: 45px;"></span>
+            </div>
+
+            <div class="settings-container">
+                <div class="settings-box">
+                    <div class="setting-item">
+                        <span>تأثيرات الاهتزاز (Haptic) 📳</span>
+                        <label class="switch">
+                            <input type="checkbox" id="hapticToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-box">
+                    <span style="font-weight: bold; font-size: 15px; color: var(--primary); display: block; margin-bottom: 15px;">إضافة كلمة وقصف خاص بيك ➕</span>
+                    <div class="add-custom-qasf">
+                        <input type="text" id="customWord" placeholder="الكلمة المفتاحية (مثال: تفاحة)">
+                        <input type="text" id="customReply" placeholder="الرد المزلزل اللي يطير الجبهة...">
+                        <button onclick="addNewCustomQasf()">حفظ الكلمة في النظام</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. شاشة الخروج (ExitScreen) -->
+        <div class="screen hidden" id="exitScreen">
+            <div class="exit-content">
+                <h2>وين شارد؟ 🏃‍♂️💀</h2>
+                <p>تريد تطلع وتعوف اللعبة؟ ما تطلع منا إلا تنجبر تاكل قصفة تفوق التوقعات تليق بجبهتك المحترمة! 😂💥</p>
+                <button class="menu-btn" style="width: 100%; margin-bottom: 14px;" onclick="showScreen('gameplay')">🤦‍♂️ تراجعت، رجعني للساحة</button>
+                <button class="menu-btn exit" style="width: 100%;" onclick="showScreen('mainMenu')">🚪 اطلع غصب (الرئيسية)</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // قاعدة البيانات الأساسية لردود الكلمات
+        // قاعدة البيانات الأساسية المقننة والمطهرة بالكامل
         let qasfDatabase = {
             "مربع": "جبهتك صايرة مربع ومحيطها صفر! 📐💥",
             "بيت": "عبالي قصر! لو تشتريلك عقل وتطلع من بيتكم القديم مو أحسن؟ 🏠💀",
             "عدل": "سوي حظك عدل بالأول بعدين احچي! 😂",
             "مبهذل": "المبهذل مبهذل لو يلبس ذهب، وجبهتك أكبر دليل! 👕💨",
-            "مصفح": "وجهك مصفح ما يفيد بيه حتى الصبغ! 🚗🛡️",
+            "مصفح": "وجهك مصفح ما يفيد بيه حتى الصصبغ! 🚗🛡️",
             "مدعبل": "جبهتك مدعبلة ودحرجت لآخر الشارع! 🔴😂",
             "نار": "جبهتك احترقت وصارت رماد! 🔥💀",
             "طاسة": "طاسة وترقع بطاسة، ووجهك ماله عوافة! 🥣💥",
@@ -418,32 +496,40 @@
         };
 
         const randomGhabahat = [
-            "قصف عشوائي! جبهتك طارت لغير قارة 🚀💨",
-            "لو تجمع حچيك هذا كله وتبيعه ما يجيب ربع دينار! 😂",
-            "الكلام ببلاش، بس جبهتك هسة طارت بالجو! 💥"
+            "قصف عشوائي سري سريع! جبهتك طارت لغير قارة حالياً 🚀💨",
+            "لو تجمع كلامك هذا كله وتبيعه بسوق مريدي ما يجيب ربع دينار! 😂",
+            "الحچي ببلاش، بس طيران جبهتك هسة كلفنا طاقة تكتيكية! 💥"
         ];
 
-        // لود الكلمات المخصصة من التخزين المحلي للموبايل إن وجدت
         function loadCustomQasfs() {
-            const saved = localStorage.getItem('customQasfs');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                qasfDatabase = { ...qasfDatabase, ...parsed };
+            try {
+                const saved = localStorage.getItem('customQasfs');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    qasfDatabase = { ...qasfDatabase, ...parsed };
+                }
+            } catch(e) {
+                console.error("خطأ في قراءة الذاكرة المحلية", e);
             }
         }
 
-        // إظهار وإخفاء الشاشات
         function showScreen(screenId) {
+            // إخفاء كل الشاشات عبر الكلاس الجاهز وبسلاسة
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            // إظهار الشاشة المطلوبة
             document.getElementById(screenId).classList.remove('hidden');
 
-            // تشغيل هز خفيف إذا مفعل بالإعدادات
-            if (document.getElementById('hapticToggle').checked && window.navigator.vibrate) {
-                window.navigator.vibrate(50);
+            // اهتزاز تأكيدي خفيف عند الانتقال بين القوائم
+            triggerHaptic(40);
+        }
+
+        function triggerHaptic(duration) {
+            const hapticEnabled = document.getElementById('hapticToggle').checked;
+            if (hapticEnabled && window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(duration);
             }
         }
 
-        // بناء قائمة الأزرار بشكل تلقائي لسهولة الضغط
         function buildWordsGrid() {
             const grid = document.getElementById('wordsGrid');
             grid.innerHTML = "";
@@ -456,49 +542,50 @@
             });
         }
 
-        // معالجة وإظهار القصف في الشات
         function executeQasf(word) {
             const chatBox = document.getElementById('chatBox');
             
-            // فقاعة رسالة المستخدم
+            // إضافة فقاعة المستخدم
             const userBubble = document.createElement('div');
             userBubble.className = "msg-bubble msg-user";
             userBubble.innerText = word;
             chatBox.appendChild(userBubble);
+            
+            // نزول الشات تلقائياً للأسفل
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // اهتزاز الموبايل عند القصف
-            if (document.getElementById('hapticToggle').checked && window.navigator.vibrate) {
-                window.navigator.vibrate([100, 50, 100]);
-            }
+            // اهتزاز قوي ومنفصل يتناسب مع قوة القصف!
+            triggerHaptic([80, 40, 80]);
 
-            // رد اللعبة بقصف الجبهة ورا ثانية واحدة
+            // رد الموبايل الذكي بعد 700 ملي ثانية
             setTimeout(() => {
                 const botBubble = document.createElement('div');
                 botBubble.className = "msg-bubble msg-bot";
                 
-                if (qasfDatabase[word]) {
-                    botBubble.innerText = "اللعبة: " + qasfDatabase[word];
+                // تنظيف مدخلات البحث لزيادة دقة العثور على الكلمة
+                const cleanWord = word.trim();
+                
+                if (qasfDatabase[cleanWord]) {
+                    botBubble.innerText = "النظام: " + qasfDatabase[cleanWord];
                 } else {
                     const randomIndex = Math.floor(Math.random() * randomGhabahat.length);
-                    botBubble.innerText = "اللعبة: " + randomGhabahat[randomIndex];
+                    botBubble.innerText = "النظام: " + randomGhabahat[randomIndex];
                 }
 
                 chatBox.appendChild(botBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 800);
+            }, 700);
         }
 
-        // إرسال الكلمات المكتوبة بالخانة
         function sendCustomWord() {
             const input = document.getElementById('userInput');
             const word = input.value.trim();
             if (word === "") return;
             executeQasf(word);
             input.value = "";
+            input.focus();
         }
 
-        // إضافة كلمة وقصف جديد وحفظها بموبايل اللاعب
         function addNewCustomQasf() {
             const wordInput = document.getElementById('customWord');
             const replyInput = document.getElementById('customReply');
@@ -506,30 +593,33 @@
             const reply = replyInput.value.trim();
 
             if (word === "" || reply === "") {
-                alert("اكتب الكلمة والرد أولاً يا بطل!");
+                alert("اكتب الكلمة والرد أولاً يا بطل الكود!");
                 return;
             }
 
-            // تحديث اللستة وحفظها محلياً
             qasfDatabase[word] = reply;
-            const saved = localStorage.getItem('customQasfs') ? JSON.parse(localStorage.getItem('customQasfs')) : {};
-            saved[word] = reply;
-            localStorage.setItem('customQasfs', JSON.stringify(saved));
+            
+            try {
+                const saved = localStorage.getItem('customQasfs') ? JSON.parse(localStorage.getItem('customQasfs')) : {};
+                saved[word] = reply;
+                localStorage.setItem('customQasfs', JSON.stringify(saved));
+                alert(`تم دمج الكلمة "${word}" بداخل سيرفر اللعبة بنجاح!`);
+            } catch (e) {
+                alert("تم الحفظ مؤقتاً، الذاكرة ممتلئة!");
+            }
 
-            alert(`تم حفظ الكلمة "${word}" بنجاح في نظام اللعبة!`);
             wordInput.value = "";
             replyInput.value = "";
-            buildWordsGrid(); // إعادة بناء الأزرار لتشمل الكلمة الجديدة
+            buildWordsGrid();
         }
 
-        // تشغيل الإرسال بالإنتر
+        // دعم الإرسال من خلال زر Enter في كيبورد السامسونج
         document.getElementById('userInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 sendCustomWord();
             }
         });
 
-        // التهيئة عند تشغيل اللعبة لأول مرة
         window.onload = () => {
             loadCustomQasfs();
             buildWordsGrid();
@@ -537,5 +627,3 @@
     </script>
 </body>
 </html>
-
-```
